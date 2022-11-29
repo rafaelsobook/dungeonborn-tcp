@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 
 const io = new Server(server, {
     cors: {
-        origin:['http://localhost:8080', 'https://unibotz.vercel.app']
+        origin:['http://localhost:8080', 'https://dungeonborn.vercel.app']
     }
 })
 const log = console.log
