@@ -30,7 +30,7 @@ const log = console.log
 io.on("connection", socket => {
     
     socket.on("join", data => {
-        log(data._id)
+
         const isUser = uzers.some(user => user._id === data._id)
         if(isUser) return log("user already in")
         uzers.push({...data, socketId: socket.id})
@@ -42,7 +42,7 @@ io.on("connection", socket => {
     socket.on("stop", detal => {
         const theUser = uzers.find(user => user._id === detal._id)
         if(!theUser) return
-        log(detal)
+  
         io.emit("aUzerStopped", detal)
         
         uzers = uzers.map(user => user._id === detal._id ? {...user, _minning: false, _training: false, dirTarg: { x:detal.dirTarg.x ,z:detal.dirTarg.z}, x: detal.mypos.x, z: detal.mypos.z} : user)
@@ -188,52 +188,7 @@ io.on("connection", socket => {
     socket.on("pickSword", data => {
         io.emit("swordIsPicked", data)
     })
-    // socket.on("fireAnim", botId => {
-    //     io.emit("userFireAnim", botId)
-    // })
-    // socket.on("hit", data => {
-    //     io.emit("botIsHit", data)
-    // })
-    // socket.on("smoke", botId => {
-    //     io.emit("smokeTheBot", botId)
-    // })
-    // socket.on('explode', botId => {
-    //     io.emit("botExploded", botId)
-    //     uzers = uzers.filter(user => user.botdet._id !== botId )
-    // })
-    // // crashed !
-    // socket.on("bounce", det => {
-    //     log(det)
-    //     io.emit("botbounced", det)//botId, dirTarg
-    // })
-    // socket.on("admin", data => {
-    //     io.emit('mkemons', data)
-    //     monz.push(data)
-    // })
-    // // MONSTERS
-    // socket.on('monsdetect', data => {
-    //     io.emit("monsdetected", data)
-    //     monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isTargId: data.targId} : mon)
-    // })
-    // socket.on('monstop', data => {
-    //     io.emit("monstoped", data)
-    //     monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, xloc: data.loc.x, zloc: data.loc.z,isTargId: undefined} : mon)
-    // })
-    // socket.on('monsattack', data => {
-    //     io.emit("monattacked", data)
-    //     monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, xloc: data.loc.x, zloc: data.loc.z} : mon)
-    // })
-    // socket.on("monstopattack", monsId => {
-    //     io.emit("monstopattacked", monsId)
-    // })
-    // socket.on('monshit', data => {
-    //     monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, monshp: mon.monshp -= data.dmg} : mon)
-    // })
-
-    // socket.on('monsremove', monsId => {
-    //     monz = monz.filter(mon => mon.monsId !== monsId)
-    //     log("one monster is removed ! UpdatedMonster ", monz)
-    // })
+  
 
     socket.on("disconnect", () => {
         const theUzer = uzers.find(user => user.socketId === socket.id)
