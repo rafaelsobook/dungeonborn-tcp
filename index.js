@@ -45,7 +45,7 @@ io.on("connection", socket => {
         log(detal)
         io.emit("aUzerStopped", detal)
         
-        uzers = uzers.map(user => user._id === detal._id ? {...user, _minning: false, _training: false, dirTarg: { x:detal.dirTarg.x ,z:detal.dirTarg.z}} : user)
+        uzers = uzers.map(user => user._id === detal._id ? {...user, _minning: false, _training: false, dirTarg: { x:detal.dirTarg.x ,z:detal.dirTarg.z}, x: detal.mypos.x, z: detal.mypos.z} : user)
     })
     socket.on("move", detal => {
         io.emit("aMechMove", detal)
@@ -76,6 +76,10 @@ io.on("connection", socket => {
     socket.on("userTrain", data => {
         io.emit("userIsTraining", data)
         uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _training: true } : user)
+    })
+    socket.on("userBump", data => {
+        io.emit("aUserBumped", data)
+        uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _training: false, _minning: false, mode: 'stand' } : user)
     })
     
     // FROM ADMIN EMITS
@@ -122,18 +126,20 @@ io.on("connection", socket => {
     })
     // spawncheats by admin
     socket.on("sft", data => {
+        //isang besses lang dapat irun to 
+        // kada simula ng server
+        // pag isipan mabuti
         data.forEach(dat => {
             treez.push(dat)
         })
-        log(data)
-        io.emit("TreePopulate", treez)
     })
     socket.on("swmpmons", data => {
+        //isang besses lang dapat irun to 
+        // kada simula ng server
+        // pag isipan mabuti
         data.forEach(dat => {
             monz.push(dat)
         })
-        log(data)
-        io.emit("placeMonsters", monz)
     })
     socket.on("monsWillChase", data => {
         monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isChasing: true, isAttacking: false, targHero: data.targHero} : mon)
