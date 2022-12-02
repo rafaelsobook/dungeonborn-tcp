@@ -12,7 +12,7 @@ let uzers = []
 let lootz = []
 let monz = []
 let seedz = []
-let orez = [{ meshId: '145', spawntype: "ore", place: "swampforest", pos: "0,0", hits: 3}]
+let orez = [{ meshId: '145', spawntype: "ore", place: "swampforest", pos: "10,-30", hits: 3}]
 // const {swampTreez} = require("./swampforest")
 let treez = [{ meshId: '4w2', spawntype: "trees", place: "swampforest", pos: "-50,2", hits: 2}]
 
@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 
 const io = new Server(server, {
     cors: {
-        origin:[ 'http://localhost:8080','https://rafael29.itch.io/dungeon-born', 'https://dungeonborn.vercel.app']
+        origin:['http://localhost:8080', 'https://dungeonborn.vercel.app']
     }
 })
 const log = console.log
