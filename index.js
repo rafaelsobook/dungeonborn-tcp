@@ -22,7 +22,7 @@ app.get("/", (req, res) => {
 
 const io = new Server(server, {
     cors: {
-        origin:['https://rafael29.itch.io/dungeon-born','http://localhost:8080', 'https://dungeonborn.vercel.app']
+        origin:[ 'http://localhost:8080','https://rafael29.itch.io/dungeon-born', 'https://dungeonborn.vercel.app']
     }
 })
 const log = console.log
