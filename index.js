@@ -167,7 +167,7 @@ io.on("connection", socket => {
         if(theUzer){
             const newArr = uzers.filter(user => user._id !== data._id)
             uzers = newArr
-            monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isChasing: false, isAttacking: false, targHero: undefined} : mon)
+            monz = monz.map(mon => mon.targHero === data.monsId ? {...mon, isChasing: false, isAttacking: false, targHero: undefined} : mon)
             io.emit("aUserDied",{ _id:data._id, monsId: data.monsId})
         }else{log("a user not found ! line 153")}
     })
