@@ -188,6 +188,9 @@ io.on("connection", socket => {
     socket.on("pickSword", data => {
         io.emit("swordIsPicked", data)
     })
+    socket.on("ping", userName => {
+        io.emit('pinged', {name: userName, length: uzers.length})
+    })
   
 
     socket.on("disconnect", () => {
