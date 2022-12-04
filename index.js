@@ -64,7 +64,7 @@ io.on("connection", socket => {
         if(!exist) return log("cannot find uzer")
     
         io.emit('userAttack', data)
-        uzers = uzers.map(user => user._id === data._id ? {...user, mode: data.mode } : user)
+        uzers = uzers.map(user => user._id === data._id ? {...user, mode: data.mode, dirTarg: data.dirTarg } : user)
     })
     socket.on("stop_isAttack", data => {
         io.emit('stop_isAttackingFalse', data)
@@ -149,11 +149,10 @@ io.on("connection", socket => {
         monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isAttacking: true, isChasing: false, targHero: data.targHero, pos: data.pos} : mon)
         io.emit("monsAttack", data)
     })
-    socket.on("monsStopChasing", data => {
-        monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isChasing: false, targHero: undefined} : mon)
-    })
+
     socket.on("monsterIsHit", data => {
-        monz = monz.map(mons => mons.monsId === data.monsId ? {...mons, hp: mons.hp -= data.dmgTaken} : mons)
+        monz = monz.map(mons => mons.monsId === data.monsId ? {...mons,pos: data.pos, hp: mons.hp -= data.dmgTaken} : mons)
+        uzers = uzers.map(theuser => theuser._id === data._id ? {...theuser, x: data.mypos.x, z: data.mypos.z} : theuser)
         io.emit("monsterGotHit", data)
     })
     socket.on("monsDied", data => {
@@ -188,8 +187,8 @@ io.on("connection", socket => {
     socket.on("pickSword", data => {
         io.emit("swordIsPicked", data)
     })
-    socket.on("ping", userName => {
-        io.emit('pinged', {name: userName, length: uzers.length})
+    socket.on("ping", data => {
+        io.emit('pinged', {name: data.name, length: uzers.length})
     })
   
 
@@ -198,6 +197,7 @@ io.on("connection", socket => {
         if(theUzer){
             const newArr = uzers.filter(user => user.socketId !== socket.id)
             uzers = newArr
+            monz = monz.map(mon => mon.targHero === theUzer._id ? {...mon, isChasing: false, targHero: undefined} : mon)
             io.emit("aUserDisconnect", theUzer._id)
         }else{log("a user disconnects not found !")}
     })
