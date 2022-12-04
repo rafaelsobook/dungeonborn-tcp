@@ -105,7 +105,6 @@ io.on("connection", socket => {
         const theOre = orez.find(oree => oree.meshId === data.meshId)
         if(theOre && theOre.hits <= 0){
             orez = orez.filter(oree => oree.meshId !== data.meshId)
-            log(orez)
         }
     })
     socket.on("treeDeductHits", data => {
@@ -199,6 +198,7 @@ io.on("connection", socket => {
             uzers = newArr
             monz = monz.map(mon => mon.targHero === theUzer._id ? {...mon, isChasing: false, targHero: undefined} : mon)
             io.emit("aUserDisconnect", theUzer._id)
+            log(uzers)
         }else{log("a user disconnects not found !")}
     })
 })
