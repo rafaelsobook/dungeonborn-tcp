@@ -34,10 +34,9 @@ io.on("connection", socket => {
         const isUser = uzers.some(user => user._id === data._id)
         if(isUser) return log("user already in")
         uzers.push({...data, socketId: socket.id})
-        log(uzers.length)
+        log(`${data.name} has joined`)
 
         io.emit("userJoined", {uzers,orez,treez, seedz, monz}) //monz is the AI monsters
-        uzers.forEach(uzzer => log(uzzer.name))
     })
     socket.on("stop", detal => {
         const theUser = uzers.find(user => user._id === detal._id)
@@ -131,6 +130,7 @@ io.on("connection", socket => {
         data.forEach(dat => {
             treez.push(dat)
         })
+        log("trees " + data.length)
     })
     socket.on("swmpmons", data => {
         //isang besses lang dapat irun to 
@@ -139,6 +139,7 @@ io.on("connection", socket => {
         data.forEach(dat => {
             monz.push(dat)
         })
+        log("mons length  " + data.length)
     })
     socket.on("monsWillChase", data => {
         monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isChasing: true, isAttacking: false, targHero: data.targHero} : mon)
@@ -171,10 +172,10 @@ io.on("connection", socket => {
     })
     // UNSHOW SWORD AFTER THROWING THE SWORD
     socket.on("unShowSword", data => {
-        log(data._id)
+     
         const theUser = uzers.find(uzer => uzer._id === data._id)
         if(!theUser) return log("line 172 unshowsword uzer not found on uzers")
-        log('found')
+  
         uzers = uzers.map(uzer => uzer._id === data._id ? {...uzer, weapon: "none"} : uzer)
         io.emit('swordhide', data)
     })
@@ -189,7 +190,15 @@ io.on("connection", socket => {
     socket.on("ping", data => {
         io.emit('pinged', {name: data.name, length: uzers.length})
     })
-  
+    socket.on('dispose', data => {
+        const theUzer = uzers.find(user => user._id === data._id)
+        if(theUzer){
+            uzers = uzers.filter(user => user._id !== data._id)
+            monz = monz.map(mon => mon.targHero === theUzer._id ? {...mon, isChasing: false, targHero: undefined} : mon)
+        }
+        log(uzers)
+        io.emit('removeChar', data)
+    })
 
     socket.on("disconnect", () => {
         const theUzer = uzers.find(user => user.socketId === socket.id)
@@ -198,7 +207,6 @@ io.on("connection", socket => {
             uzers = newArr
             monz = monz.map(mon => mon.targHero === theUzer._id ? {...mon, isChasing: false, targHero: undefined} : mon)
             io.emit("aUserDisconnect", theUzer._id)
-            log(uzers)
         }else{log("a user disconnects not found !")}
     })
 })
