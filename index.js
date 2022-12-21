@@ -15,6 +15,7 @@ let seedz = []
 let orez = [{ meshId: '145', spawntype: "ore", place: "swampforest", pos: "10,-30", hits: 3}]
 // const {swampTreez} = require("./swampforest")
 let treez = [{ meshId: '4w2', spawntype: "trees", place: "swampforest", pos: "-50,2", hits: 2}]
+let treasurez = []
 
 app.get("/", (req, res) => {
     res.send(uzers).status(200)
@@ -35,8 +36,8 @@ io.on("connection", socket => {
         if(isUser) return log("user already in")
         uzers.push({...data, socketId: socket.id})
         log(`${data.name} has joined`)
-
-        io.emit("userJoined", {uzers,orez,treez, seedz, monz}) //monz is the AI monsters
+        log("uzers", uzers)
+        io.emit("userJoined", {uzers,orez,treez, seedz, monz, treasurez, lootz}) //monz is the AI monsters
     })
     socket.on("stop", detal => {
         const theUser = uzers.find(user => user._id === detal._id)
@@ -44,7 +45,7 @@ io.on("connection", socket => {
   
         io.emit("aUzerStopped", detal)
         
-        uzers = uzers.map(user => user._id === detal._id ? {...user, _minning: false, _training: false, dirTarg: { x:detal.dirTarg.x ,z:detal.dirTarg.z}, x: detal.mypos.x, z: detal.mypos.z} : user)
+        uzers = uzers.map(user => user._id === detal._id ? {...user, _minning: false, _training: false, dirTarg: { x:detal.dirTarg.x ,z:detal.dirTarg.z}, x: detal.mypos.x, z: detal.mypos.z, mode: detal.mode} : user)
     })
     socket.on("move", detal => {
         io.emit("aMechMove", detal)
@@ -90,10 +91,29 @@ io.on("connection", socket => {
         treez.push(data)
         io.emit("receiveWood", data)
     })
+    socket.on("treasure", data => {
+        treasurez.push(data)
+        io.emit("putTreasure", data)
+    })
     socket.on("sword", data => {
+        log(data)
         lootz.push(data)
         io.emit("dropsword", data)
     })
+    socket.on("will-open-treasure", data => {
+        io.emit('treasure-isOpening', data)
+        treasurez = treasurez.map(tre => tre.meshId === data.meshId ? {...tre, openingBy: data.openingBy, isOpening: true} : tre)
+        log('is opening')
+        log(treasurez)
+    })
+    socket.on("reclose-treasure", meshId => {
+        log("reclose")
+        log(meshId)
+        treasurez = treasurez.map(tre => tre.meshId === meshId ? {...tre, openingBy:undefined, isOpening:false} : tre)
+        log(treasurez)
+        io.emit("reclosedTreasure", meshId)
+    })
+    socket.on("showSwords", uzerdId => io.emit('shownSwordLength', uzerdId))
 
     // ABOUT RECOURCES
     socket.on("oreDeductHits", data => {
@@ -115,6 +135,11 @@ io.on("connection", socket => {
         if(theTree && theTree.hits <= 0){
             treez = treez.filter(puno => puno.meshId !== data.meshId)
         }
+    })
+    socket.on("treasure-opened", data => {
+        io.emit("treasure-removed", data)
+        log("line 144" + data.meshId)
+        treasurez = treasurez.filter(tre => tre.meshId !== data.meshId)
     })
     socket.on("plantSeed", data => {
         const {meshId, spawntype, place,pos,hits} = data
@@ -161,13 +186,25 @@ io.on("connection", socket => {
     socket.on('playerIsHit', data => {
         io.emit("playerHitted", data)
     })
+    socket.on('playerIsHitByHero', detal => {
+
+        const theUzer = uzers.find(usr => usr._id === detal.targHero)
+        if(!theUzer) return log("the player not found line 185")
+        uzers = uzers.map(user => user._id === detal.targHero ? {...user, _minning: false, _training: false, dirTarg: { x:detal.dirTarg.x ,z:detal.dirTarg.z}, x: detal.pos.x, z: detal.pos.z} : user)
+
+        io.emit("hitByHero", detal)
+
+    })
+    socket.on("showDeductLifeInPublic", data => {
+        io.emit('deductLifeInMesh', data)
+    })
     socket.on("playerDied", data => {
         const theUzer = uzers.find(user => user._id === data._id)
         if(theUzer){
             const newArr = uzers.filter(user => user._id !== data._id)
             uzers = newArr
-            monz = monz.map(mon => mon.targHero === data.monsId ? {...mon, isChasing: false, isAttacking: false, targHero: undefined} : mon)
-            io.emit("aUserDied",{ _id:data._id, monsId: data.monsId})
+            monz = monz.map(mon => mon.targHero === data._id ? {...mon, isChasing: false, isAttacking: false, targHero: undefined} : mon)
+            io.emit("aUserDied", data)
         }else{log("a user not found ! line 153")}
     })
     // UNSHOW SWORD AFTER THROWING THE SWORD
@@ -180,16 +217,28 @@ io.on("connection", socket => {
         io.emit('swordhide', data)
     })
     socket.on("equipingSword", data => {
-
         uzers = uzers.map(uzer => uzer._id === data._id ? {...uzer, weapon: data.swordDetail, mode: data.mode} : uzer)
         io.emit("aUserEquipSword", data)
     })
+    socket.on("equipArmor", data => {
+        uzers = uzers.map(uzer => uzer._id === data._id ? {...uzer, armor: data.armorDetail, mode: data.mode} : uzer)
+        io.emit("aUserEquipArmor", data)
+    })
     socket.on("pickSword", data => {
+        lootz = lootz.filter(loot => loot.meshId !== data.meshId)
+
         io.emit("swordIsPicked", data)
     })
     socket.on("ping", data => {
         io.emit('pinged', {name: data.name, length: uzers.length})
     })
+
+    // WORLD CHAT
+    socket.on('sendto-world', data => {
+        io.emit('sentto-world', data)
+    })
+
+    // DISCONNECTIONS
     socket.on('dispose', data => {
         const theUzer = uzers.find(user => user._id === data._id)
         if(theUzer){
@@ -209,6 +258,7 @@ io.on("connection", socket => {
             io.emit("aUserDisconnect", theUzer._id)
         }else{log("a user disconnects not found !")}
     })
+
 })
 
 server.listen(PORT, () => log("TCP server is on"))
