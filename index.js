@@ -70,12 +70,14 @@ io.on("connection", socket => {
         io.emit('stop_isAttackingFalse', data)
     })
     socket.on("userMine", data => {
+        log("mode " + data.mode)
         io.emit("userIsMinning", data)
-        uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _minning: true } : user)
+        uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _minning: true, mode: data.mode } : user)
     })
     socket.on("userTrain", data => {
+        log("mode " + data.mode)
         io.emit("userIsTraining", data)
-        uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _training: true } : user)
+        uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _training: true, mode: data.mode } : user)
     })
     socket.on("userBump", data => {
         io.emit("aUserBumped", data)
@@ -104,7 +106,7 @@ io.on("connection", socket => {
         io.emit('treasure-isOpening', data)
         treasurez = treasurez.map(tre => tre.meshId === data.meshId ? {...tre, openingBy: data.openingBy, isOpening: true} : tre)
         log('is opening')
-        log(treasurez)
+        uzers = uzers.map(user => user._id === data.openingBy ? {...user, mode: data.mode } : user)
     })
     socket.on("reclose-treasure", meshId => {
         log("reclose")
