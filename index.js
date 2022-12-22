@@ -66,9 +66,7 @@ io.on("connection", socket => {
         io.emit('userAttack', data)
         uzers = uzers.map(user => user._id === data._id ? {...user, mode: data.mode, dirTarg: data.dirTarg } : user)
     })
-    socket.on("stop_isAttack", data => {
-        io.emit('stop_isAttackingFalse', data)
-    })
+
     socket.on("userMine", data => {
         log("mode " + data.mode)
         io.emit("userIsMinning", data)
