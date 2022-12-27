@@ -68,7 +68,6 @@ io.on("connection", socket => {
     })
 
     socket.on("userMine", data => {
-        log("mode " + data.mode)
         io.emit("userIsMinning", data)
         uzers = uzers.map(user => user._id === data._id ? {...user, x: data.pos.x, z: data.pos.z, dirTarg: data.dirTarg, _minning: true, mode: data.mode } : user)
     })
@@ -174,7 +173,6 @@ io.on("connection", socket => {
         monz = monz.map(mon => mon.monsId === data.monsId ? {...mon, isAttacking: true, isChasing: false, targHero: data.targHero, pos: data.pos} : mon)
         io.emit("monsAttack", data)
     })
-
     socket.on("monsterIsHit", data => {
         monz = monz.map(mons => mons.monsId === data.monsId ? {...mons,pos: data.pos, hp: mons.hp -= data.dmgTaken} : mons)
         uzers = uzers.map(theuser => theuser._id === data._id ? {...theuser, x: data.mypos.x, z: data.mypos.z} : theuser)
